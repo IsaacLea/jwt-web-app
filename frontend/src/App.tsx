@@ -22,15 +22,18 @@ function App() {
         <Route path="/" element={<Home/>}/>
         <Route path="/home" element={<Home/>}/>
         <Route path="/logon" element={<Logon/>}/>
+        <Route element={<ProtectedRoute/>}>
+          <Route path="/private" element={<PrivatePage/>}/>
+        </Route>
 
-        <Route
+        {/* <Route
           path="/private"
           element={
             <ProtectedRoute>
               <PrivatePage />
             </ProtectedRoute>
           }
-        />
+        /> */}
         
         {/* <Route path="*" element={<NotFound/>}/> */}
       </Routes>

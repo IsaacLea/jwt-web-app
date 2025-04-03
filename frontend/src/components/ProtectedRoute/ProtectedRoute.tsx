@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
 
-const ProtectedRoute = ({ children }: {children: React.ReactNode; }) => {
+const ProtectedRoute = () => {
 
   const [currentUser, setCurrentUser] = useState<string | undefined | null>(undefined);
-  const sessionToken = localStorage.getItem('sessionToken');
+  
 
+  // Call the API to check if the session token is valid
   const isValidSessionToken = async (sessionToken : string | null) => {
 
-    console.log("Check session token: ", sessionToken);
     try {
       const response = await fetch('http://localhost:3000/api/check-session', {
         method: 'GET',
@@ -24,6 +24,14 @@ const ProtectedRoute = ({ children }: {children: React.ReactNode; }) => {
   }
 
   useEffect(() => {
+
+    const sessionToken = localStorage.getItem('sessionToken');
+
+    if (!sessionToken) {
+      setCurrentUser(null); // No session token, user is not logged in
+      return;
+    }
+    
     isValidSessionToken(sessionToken).then((isValid) => {
       if (isValid) {
         console.log("Valid session token");       
@@ -41,8 +49,8 @@ const ProtectedRoute = ({ children }: {children: React.ReactNode; }) => {
     return <Navigate to="/logon" replace />;
   }
 
-  // Render the protected component if authenticated
-  return children; 
+  // Return Outlet instead of children so that this component can be used as a layout component, meaning it can wrap any number of protected child reoutes
+  return <Outlet />; 
 
 }
 
