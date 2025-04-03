@@ -13,7 +13,7 @@ app.use(express.json());
 app.use(cors({
     origin: 'http://localhost:5173',
     methods: ['GET', 'POST'],
-    allowedHeaders: ['Content-Type']
+    allowedHeaders: ['Content-Type', 'Authorization'] // Added 'Authorization' to allowed headers
 }));
 
 // Enable CORS for all origins (for development purposes only)
@@ -25,8 +25,12 @@ const sessionStore = new Set(); // In-memory store for session tokens
 
 // Middleware to validate session token
 function validateSession(req, res, next) {
+
+    console.log('Validating session...');
     const token = req.headers['authorization'];
+    console.log(token);
     if (sessionStore.has(token)) {
+        console.log("token found in session store");
         next();
     } else {
         res.status(401).json({ message: 'Unauthorized. Please logon.' });

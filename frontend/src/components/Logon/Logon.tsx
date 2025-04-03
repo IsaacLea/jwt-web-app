@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'; // Added import for useNavigate
 function Logon() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  // const navigate = useNavigate(); // Initialize useNavigate
+  const navigate = useNavigate(); // Initialize useNavigate
 
   const handleLogon = async () => {
     try {
@@ -26,7 +26,10 @@ function Logon() {
       const data = await response.json();
       localStorage.setItem('sessionToken', data.token); // Store session token
       alert(`Logged in successfully! Session token: ${data.token}`);
-      // navigate('/'); // Redirect to home page
+
+      console.log("Navigate to home!");
+      
+      //navigate('/'); // Redirect to home page
     } catch (error) {
       alert(`Error: ${error instanceof Error ? error.message : String(error)}`);
     }
