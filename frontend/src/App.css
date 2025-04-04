@@ -4,46 +4,5 @@
   text-align: center;
 }
 
-.app-container {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  margin:0;
-}
 
-.app-header {
-  background-color: #17cf79;
-  color: white;
-  padding: 1rem;
-}
-
-.app-main {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 2rem;
-  background-color: #579db3;
-}
-
-.app-footer {
-  background-color: #17cf79;
-  color: white;
-  padding: 1rem;
-  text-align: center;
-}
-
-.logon-button {
-  background-color: #646cff;
-  color: white;
-  border: none;
-  padding: 0.8em 1.5em;
-  font-size: 1em;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.logon-button:hover {
-  background-color: #535bf2;
-}
 

@@ -1,9 +1,3 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  text-align: center;
-}
-
 .app-container {
   display: flex;
   flex-direction: column;
@@ -33,17 +27,6 @@
   text-align: center;
 }
 
-.logon-button {
-  background-color: #646cff;
-  color: white;
-  border: none;
-  padding: 0.8em 1.5em;
-  font-size: 1em;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
+button {
+  margin: 5px;
 }
-
-.logon-button:hover {
-  background-color: #535bf2;
-}
-

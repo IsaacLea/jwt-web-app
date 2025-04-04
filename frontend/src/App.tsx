@@ -19,22 +19,15 @@ function App() {
       {/* <button onClick={() => navigate(-1)}>go back</button> */}
       {/* <Nav/> */}
       <Routes>                
-        <Route path="/" element={<Home/>}/>
-        <Route path="/home" element={<Home/>}/>
+        
         <Route path="/logon" element={<Logon/>}/>
+
         <Route element={<ProtectedRoute/>}>
+          <Route path="/" element={<Home/>}/>
+          <Route path="/home" element={<Home/>}/>
           <Route path="/private" element={<PrivatePage/>}/>
         </Route>
-
-        {/* <Route
-          path="/private"
-          element={
-            <ProtectedRoute>
-              <PrivatePage />
-            </ProtectedRoute>
-          }
-        /> */}
-        
+            
         {/* <Route path="*" element={<NotFound/>}/> */}
       </Routes>
     </div>
