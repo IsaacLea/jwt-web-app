@@ -68,6 +68,12 @@ app.get('/api/check-session', validateSession, (req, res) => {
     res.json({ message: 'You are logged in!' });
 });
 
+// Server time endpoint
+app.get('/api/server-time', validateSession, (req, res) => {
+    const serverTime = new Date().toISOString();
+    res.json({ serverTime });
+});
+
 // Start the server
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
