@@ -1,3 +1,10 @@
+/**
+ * Simple Express server to handle logon, logout, and session validation.
+ * Consider using express-session or similar for production.
+ * This is a basic implementation for demonstration purposes only.
+ */
+
+
 const express = require('express');
 const crypto = require('crypto');
 const cors = require('cors');
@@ -60,7 +67,6 @@ app.post('/api/logon', (req, res) => {
 
     // Generate a random session token
     const sessionToken = crypto.randomBytes(16).toString('hex');
-    const refreshToken = crypto.randomBytes(16).toString('hex'); // Generate refresh token
     const sessionStartTime = new Date();
     const sessionExpiry = new Date(sessionStartTime.getTime() + 30 * 60 * 1000); // 30 minutes expiry
 
@@ -69,12 +75,11 @@ app.post('/api/logon', (req, res) => {
         username,
         startTime: sessionStartTime,
         expiry: sessionExpiry,
-        refreshToken // Store refresh token
     });
 
     console.log(`Generated session token: ${sessionToken}`);
-    console.log(`Generated refresh token: ${refreshToken}`);
-    res.json({ token: sessionToken, refreshToken }); // Return both tokens
+    
+    res.json({ token: sessionToken }); // Return both tokens
 });
 
 // Logout endpoint
