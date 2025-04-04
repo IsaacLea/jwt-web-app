@@ -60,6 +60,7 @@ app.post('/api/logon', (req, res) => {
 
     // Generate a random session token
     const sessionToken = crypto.randomBytes(16).toString('hex');
+    const refreshToken = crypto.randomBytes(16).toString('hex'); // Generate refresh token
     const sessionStartTime = new Date();
     const sessionExpiry = new Date(sessionStartTime.getTime() + 30 * 60 * 1000); // 30 minutes expiry
 
@@ -67,11 +68,30 @@ app.post('/api/logon', (req, res) => {
     sessionStore.set(sessionToken, {
         username,
         startTime: sessionStartTime,
-        expiry: sessionExpiry
+        expiry: sessionExpiry,
+        refreshToken // Store refresh token
     });
 
     console.log(`Generated session token: ${sessionToken}`);
-    res.json({ token: sessionToken });
+    console.log(`Generated refresh token: ${refreshToken}`);
+    res.json({ token: sessionToken, refreshToken }); // Return both tokens
+});
+
+// Logout endpoint
+app.post('/api/logout', (req, res) => {
+    const token = req.headers['authorization'];
+
+    if (!token) {
+        return res.status(400).json({ message: 'Authorization token is required.' });
+    }
+
+    if (sessionStore.has(token)) {
+        sessionStore.delete(token); // Invalidate the session token
+        console.log(`Session token invalidated: ${token}`);
+        res.json({ message: 'Logged out successfully.' });
+    } else {
+        res.status(400).json({ message: 'Invalid session token.' });
+    }
 });
 
 // Check session endpoint

@@ -9,9 +9,26 @@ function Home() {
 
   const sessionToken = localStorage.getItem('sessionToken'); // Retrieve session token
 
-  const clearSessionToken = () => {
-    localStorage.removeItem('sessionToken'); // Clear session token
-    window.location.reload(); // Reload to reflect changes
+  const logOut = async () => {
+
+    const config = {
+      // headers: { Authorization: `Bearer ${sessionToken}` }
+      headers: { Authorization: `${sessionToken}` }
+    };
+
+    try {
+      const response = await axios.post('http://localhost:3000/api/logout', null, config);
+      console.log(response.data); 
+
+      localStorage.removeItem('sessionToken'); // Clear session token
+      window.location.reload(); // Reload to reflect changes
+
+    }
+    catch (error) {
+      console.error('Error Logging out:', error); // Log any errors
+    }
+
+    
   };
 
   // Function to call the server and get the current time
@@ -25,7 +42,7 @@ function Home() {
     console.log(config);
 
     try {
-      const response = await axios.get('http://localhost:3000/api/server-time', config); // Fetch server time using axios
+      const response = await axios.get('http://localhost:3000/api/server-time', config);
       console.log(response.data); // Log the server time
 
       setServerTime(response.data.serverTime); // Set server time to state
@@ -50,7 +67,7 @@ function Home() {
         {sessionToken && (
           <>
             <p>Your session token: {sessionToken}</p>
-            <button onClick={clearSessionToken}>Clear Session Token</button> 
+            <button onClick={logOut}>Log out</button> 
             <button onClick={getServerTime}>Call Server to get time</button> 
             {serverTime && <p>Server time: {serverTime}</p>}
           </>
