@@ -19,19 +19,26 @@ app.use(cors({
 // Enable CORS for all origins (for development purposes only)
 // app.use(cors())
 
-
-
-const sessionStore = new Set(); // In-memory store for session tokens
+const sessionStore = new Map(); // Change to Map to store session details
 
 // Middleware to validate session token
 function validateSession(req, res, next) {
-
+    
     console.log('Validating session...');
     const token = req.headers['authorization'];
     console.log(token);
-    if (sessionStore.has(token)) {
-        console.log("token found in session store");
-        next();
+
+    const session = sessionStore.get(token);
+    if (session) {
+        const now = new Date();
+        if (now < session.expiry) {
+            console.log("Valid session found");
+            next();
+        } else {
+            console.log("Session expired");
+            sessionStore.delete(token); // Remove expired session
+            res.status(401).json({ message: 'Session expired. Please logon again.' });
+        }
     } else {
         res.status(401).json({ message: 'Unauthorized. Please logon.' });
     }
@@ -39,7 +46,6 @@ function validateSession(req, res, next) {
 
 // Logon endpoint
 app.post('/api/logon', (req, res) => {
-
     console.log(req.body);
 
     const { username, password } = req.body;
@@ -54,12 +60,17 @@ app.post('/api/logon', (req, res) => {
 
     // Generate a random session token
     const sessionToken = crypto.randomBytes(16).toString('hex');
-    
-    // In a real application, you would store this token in a database or in-memory store
+    const sessionStartTime = new Date();
+    const sessionExpiry = new Date(sessionStartTime.getTime() + 30 * 60 * 1000); // 30 minutes expiry
+
+    // Store session details
+    sessionStore.set(sessionToken, {
+        username,
+        startTime: sessionStartTime,
+        expiry: sessionExpiry
+    });
+
     console.log(`Generated session token: ${sessionToken}`);
-    
-    sessionStore.add(sessionToken); // Store the session token
-    
     res.json({ token: sessionToken });
 });
 
