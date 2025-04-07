@@ -1,7 +1,7 @@
 import './home.css';
 import { Link } from 'react-router-dom'; // Added import for Link
-import axios from 'axios'; // Import axios
 import { useState } from 'react';
+import axiosInstance from '../../Utils/AxiosInstance';
 
 function Home() {
 
@@ -11,13 +11,8 @@ function Home() {
 
   const logOut = async () => {
 
-    const config = {
-      // headers: { Authorization: `Bearer ${sessionToken}` }
-      headers: { Authorization: `${sessionToken}` }
-    };
-
     try {
-      const response = await axios.post('http://localhost:3000/api/logout', null, config);
+      const response = await axiosInstance.post('/api/logout');
       console.log(response.data); 
 
       localStorage.removeItem('sessionToken'); // Clear session token
@@ -28,21 +23,13 @@ function Home() {
       console.error('Error Logging out:', error); // Log any errors
     }
 
-    
   };
 
   // Function to call the server and get the current time
   const getServerTime = async () => {
 
-    const config = {
-      // headers: { Authorization: `Bearer ${sessionToken}` }
-      headers: { Authorization: `${sessionToken}` }
-    };
-
-    console.log(config);
-
     try {
-      const response = await axios.get('http://localhost:3000/api/server-time', config);
+      const response = await axiosInstance.get('/api/server-time');
       console.log(response.data); // Log the server time
 
       setServerTime(response.data.serverTime); // Set server time to state
