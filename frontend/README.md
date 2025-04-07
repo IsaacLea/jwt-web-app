@@ -13,7 +13,10 @@ Initialized with Vite + Typescript + React
 - Axios is configured with an interceptor to automatically add the Authentication creds in each api call
 - Protected routes are setup so all pages except logon require valid creds
 
+## Considerations
 
+- express-session can be used to implement the server side session using a framework, supporting many differet session storage types.  Session data is stored server side and sessionId in a client side cookie.
+- express-cookie can be used to store the session information on the client side, removing the need for stateful session storage.  It encodes all session data in the cookie, so it is only useful with a small session info size.
 
 If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
 
