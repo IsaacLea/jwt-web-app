@@ -20,8 +20,6 @@ function Logon() {
         throw new Error('Failed to logon');
       }
 
-      localStorage.setItem('sessionToken', response.data.token); // Store session token
-  
       navigate('/'); // Redirect to home page
       
     } catch (error) {

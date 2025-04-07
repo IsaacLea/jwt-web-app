@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Navigate, Outlet } from "react-router-dom";
+import axiosInstance from "../../Utils/AxiosInstance";
 
 const ProtectedRoute = () => {
 
@@ -10,14 +11,17 @@ const ProtectedRoute = () => {
   const isValidSessionToken = async (sessionToken : string | null) => {
 
     try {
-      const response = await fetch('http://localhost:3000/api/check-session', {
-        method: 'GET',
-        headers: {
-          'Authorization': sessionToken || ''
-        }
-      });
+      // const response = await fetch('http://localhost:3000/api/check-session', {
+      //   method: 'GET',
+      //   headers: {
+      //     'Authorization':  sessionToken || ''
+      //   }
+      // });
 
-      return(response.ok);
+      const response = await axiosInstance.get('http://localhost:3000/api/check-session');
+
+      return (response.status == 200);
+      
     } catch {
       return false;
     }

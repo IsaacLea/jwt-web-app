@@ -2,12 +2,11 @@ import './home.css';
 import { Link } from 'react-router-dom'; // Added import for Link
 import { useState } from 'react';
 import axiosInstance from '../../Utils/AxiosInstance';
+import axios from 'axios';
 
 function Home() {
 
   const [serverTime, setServerTime] = useState<string | undefined | null>(undefined);
-
-  const sessionToken = localStorage.getItem('sessionToken'); // Retrieve session token
 
   const logOut = async () => {
 
@@ -15,7 +14,7 @@ function Home() {
       const response = await axiosInstance.post('/api/logout');
       console.log(response.data); 
 
-      localStorage.removeItem('sessionToken'); // Clear session token
+      //localStorage.removeItem('sessionToken'); // Clear session token
       window.location.reload(); // Reload to reflect changes
 
     }
@@ -29,15 +28,16 @@ function Home() {
   const getServerTime = async () => {
 
     try {
+      
       const response = await axiosInstance.get('/api/server-time');
-      console.log(response.data); // Log the server time
-
+      
       setServerTime(response.data.serverTime); // Set server time to state
     }
     catch (error) {
       console.error('Error fetching server time:', error); // Log any errors
     }
   };
+
 
   return (
     <div className="app-container">
@@ -51,9 +51,9 @@ function Home() {
         <br />
         <Link to="/private">Go to Private Page</Link>
         <br />
-        {sessionToken && (
+        {true && (
           <>
-            <p>Your session token: {sessionToken}</p>
+            {/* <p>Your session token: {sessionToken}</p> */}
             <button onClick={logOut}>Log out</button> 
             <button onClick={getServerTime}>Call Server to get time</button> 
             {serverTime && <p>Server time: {serverTime}</p>}
@@ -62,7 +62,7 @@ function Home() {
       </div>
     </main>
     <footer className="app-footer">
-      <p>&copy; 2023 Our Application. All rights reserved.</p>
+      {<p>&copy; Demo app</p>}
     </footer>
   </div>
   );

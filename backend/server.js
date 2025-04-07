@@ -1,17 +1,34 @@
 /**
  * Simple Express server to handle logon, logout, and session validation.
- * Consider using express-session or similar for production.
  * This is a basic implementation for demonstration purposes only.
  */
 
 
 const express = require('express');
-const crypto = require('crypto');
+const session = require('express-session');
+// const crypto = require('crypto');
 const cors = require('cors');
 const bodyParser = require('body-parser')
 
 const app = express();
 const PORT = 3000;
+
+app.use(session({
+    secret: 'my session secret', // Move to .env
+    resave: false,
+    name: 'sessionId',
+    saveUninitialized: true,
+    cookie: {
+        secure:false, // should be set to true when running over HTTPS
+        httpOnly: true, 
+        maxAge: 60 * 60 * 1000 // 1 hour.  Note this will expire the session automatically no code needed.
+    }
+}))
+
+app.use((req, res, next) => {
+    console.log(req.session);
+    next();
+});
 
 // Enable middleware to parse JSON bodies
 app.use(express.json());
@@ -20,40 +37,28 @@ app.use(express.json());
 app.use(cors({
     origin: 'http://localhost:5173',
     methods: ['GET', 'POST'],
-    allowedHeaders: ['Content-Type', 'Authorization'] // Added 'Authorization' to allowed headers
+    credentials: true,
+    // allowedHeaders: ['Content-Type', 'Authorization'] // Added 'Authorization' to allowed headers
 }));
-
-// Enable CORS for all origins (for development purposes only)
-// app.use(cors())
+// app.use(cors());
 
 const sessionStore = new Map(); // Change to Map to store session details
 
-// Middleware to validate session token
-function validateSession(req, res, next) {
-    
-    console.log('Validating session...');
-    const token = req.headers['authorization'];
-    console.log(token);
+// middleware to test if authenticated
+function isAuthenticated (req, res, next) {
+    console.log('Checking authentication...');  
+    console.log(req.session.user) ;
 
-    const session = sessionStore.get(token);
-    if (session) {
-        const now = new Date();
-        if (now < session.expiry) {
-            console.log("Valid session found");
-            next();
-        } else {
-            console.log("Session expired");
-            sessionStore.delete(token); // Remove expired session
-            res.status(401).json({ message: 'Session expired. Please logon again.' });
-        }
+    if (req.session.user) {
+        next()
     } else {
         res.status(401).json({ message: 'Unauthorized. Please logon.' });
     }
 }
 
+
 // Logon endpoint
-app.post('/api/logon', (req, res) => {
-    console.log(req.body);
+app.post('/api/logon', express.urlencoded({ extended: false }), (req, res) => {
 
     const { username, password } = req.body;
 
@@ -61,52 +66,60 @@ app.post('/api/logon', (req, res) => {
         return res.status(400).json({ message: 'Username and password are required.' });
     }
 
-    if (username !== 'admin' || password !== 'password') {
+    if (username !== 'admin' || password !== 'admin') {
         return res.status(401).json({ message: 'Invalid credentials.' });
     }
 
-    // Generate a random session token
-    const sessionToken = crypto.randomBytes(16).toString('hex');
-    const sessionStartTime = new Date();
-    const sessionExpiry = new Date(sessionStartTime.getTime() + 30 * 60 * 1000); // 30 minutes expiry
+    // regenerate the session, which is good practice to help guard against forms of session fixation
+    // This ensures a clean session with a new Id
+    req.session.regenerate(function (err) {
 
-    // Store session details
-    sessionStore.set(sessionToken, {
-        username,
-        startTime: sessionStartTime,
-        expiry: sessionExpiry,
-    });
+        if (err) next(err);
 
-    console.log(`Generated session token: ${sessionToken}`);
-    
-    res.json({ token: sessionToken }); // Return both tokens
+        // store user information in session, typically a user id
+        req.session.user = { userName: username };
+
+        // save the session before redirection to ensure page
+        // load does not happen before session is saved
+        req.session.save(function (err) {
+            if (err) return next(err)
+            res.status(200).json({ message: 'Logged in successfully.' });
+            //res.redirect('/')
+        })
+    })
+
+    console.log(req.session.id);
+
 });
 
 // Logout endpoint
-app.post('/api/logout', (req, res) => {
-    const token = req.headers['authorization'];
+app.post('/api/logout', isAuthenticated, (req, res) => {
+    const user = req.session.user;
 
-    if (!token) {
-        return res.status(400).json({ message: 'Authorization token is required.' });
-    }
-
-    if (sessionStore.has(token)) {
-        sessionStore.delete(token); // Invalidate the session token
-        console.log(`Session token invalidated: ${token}`);
-        res.json({ message: 'Logged out successfully.' });
+    if (user) {
+        req.session.destroy(err => {
+            if (err) {
+                console.error('Error destroying session:', err);
+                return res.status(500).json({ message: 'Failed to log out. Please try again.' });
+            }
+            res.clearCookie('sessionId'); // Clear the session cookie
+            res.json({ message: 'Logged out successfully.' });
+        });
     } else {
-        res.status(400).json({ message: 'Invalid session token.' });
+        res.status(400).json({ message: 'No active session to log out from.' });
     }
 });
 
-// Check session endpoint
-app.get('/api/check-session', validateSession, (req, res) => {
+app.get('/api/check-session', isAuthenticated, (req, res) => {
     res.json({ message: 'You are logged in!' });
 });
 
 // Server time endpoint
-app.get('/api/server-time', validateSession, (req, res) => {
+app.get('/api/server-time',  isAuthenticated, (req, res) => {
+    
     const serverTime = new Date().toISOString();
+
+    console.log(serverTime);
     res.json({ serverTime });
 });
 

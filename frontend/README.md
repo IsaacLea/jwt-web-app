@@ -1,14 +1,14 @@
 # Session token app
 
-This project is a simple application with a session token implementation for web security
+This project is a simple application with a session implementation for web security
 
 Initialized with Vite + Typescript + React
 
 
 ## Features
 
-- Logon flow validates credentials and issues a session token for subsequent requests
-- Session token is set with an expiry
+- Logon flow validates credentials, generates a new session, and sets the user cookie for subsequent validation
+- Session is implemented with express-session
 - Server stores the sessions in memory (for production site consider storing in a database such as redis or SQL)
 - Axios is configured with an interceptor to automatically add the Authentication creds in each api call
 - Protected routes are setup so all pages except logon require valid creds
