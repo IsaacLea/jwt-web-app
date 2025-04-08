@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'; // Added import for useNavigate
 
 // Import CSS module.  Modules allow for scoped CSS, preventing class name collisions.
 import styles from './Logon.module.css'; 
-import axiosInstance from '../../Utils/AxiosInstance';
+import axiosInstance from '../../Utils/axiosInstance';
 
 function Logon() {
   const [username, setUsername] = useState('');
@@ -19,6 +19,10 @@ function Logon() {
         console.log(response);
         throw new Error('Failed to logon');
       }
+
+      const jwt = response.data.token;
+
+      localStorage.setItem('sessionToken', jwt); // Store JWT in local storage
 
       navigate('/'); // Redirect to home page
       
