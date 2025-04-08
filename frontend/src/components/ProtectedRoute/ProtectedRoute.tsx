@@ -8,11 +8,11 @@ const ProtectedRoute = () => {
   
 
   // Call the API to check if the session token is valid
-  const isValidSessionToken = async (sessionToken : string | null) => {
+  const isValidAccessToken = async () => {
 
     try {
      
-      const response = await axiosInstance.get('http://localhost:3000/api/check-session');
+      const response = await axiosInstance.get('/api/check-session');
       
       return (response.status == 200);
       
@@ -30,7 +30,7 @@ const ProtectedRoute = () => {
       return;
     }
     
-    isValidSessionToken(jwtAccessToken).then((isValid) => {
+    isValidAccessToken().then((isValid) => {
       if (isValid) {
         console.log("Valid session token");       
         setAuthenticated(true);   

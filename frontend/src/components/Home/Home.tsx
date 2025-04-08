@@ -1,8 +1,7 @@
 import './home.css';
 import { Link } from 'react-router-dom'; // Added import for Link
 import { useState } from 'react';
-import axiosInstance from '../../Utils/AxiosInstance';
-import axios from 'axios';
+import axiosInstance from '../../Utils/axiosInstance';
 
 function Home() {
 
@@ -14,14 +13,15 @@ function Home() {
       const response = await axiosInstance.post('/api/logout');
       console.log(response.data); 
 
-      //localStorage.removeItem('sessionToken'); // Clear session token
+
+      localStorage.removeItem('accessToken'); 
+      localStorage.removeItem('refreshToken'); 
       window.location.reload(); // Reload to reflect changes
 
     }
     catch (error) {
       console.error('Error Logging out:', error); // Log any errors
     }
-
   };
 
   // Function to call the server and get the current time

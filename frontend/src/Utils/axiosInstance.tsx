@@ -10,7 +10,7 @@ const axiosInstance = axios.create({
 // Add a request interceptor to add the session token to all requests
 axiosInstance.interceptors.request.use(
   config => {
-    const jwt = localStorage.getItem('sessionToken');
+    const jwt = localStorage.getItem('accessToken');
 
     if (jwt) {
       config.headers['Authorization'] = `Bearer ${jwt}`;
@@ -23,12 +23,15 @@ axiosInstance.interceptors.request.use(
   }
 );
 
-// Add a response interceptor to handle 401 errors
+
+// Response interceptor to handle token expiration and refresh
 axiosInstance.interceptors.response.use(
   response => response,
   async error => {
+    
     const originalRequest = error.config;
 
+    // Handle 401 Unauthorized errors by using the refresh token to get a new access token and retry the request
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
@@ -53,7 +56,9 @@ axiosInstance.interceptors.response.use(
         }
       } catch (refreshError) {
         console.error('Failed to refresh token:', refreshError);
-        // Optionally, handle logout or redirect to login page here
+
+        // Redirect to login page
+        window.location.href = '/logon';
       }
     }
 

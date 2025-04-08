@@ -24,7 +24,7 @@ function Logon() {
       const jwtRefreshToken = response.data.refreshToken;
       
 
-      localStorage.setItem('sessionToken', jwtAccessToken); 
+      localStorage.setItem('accessToken', jwtAccessToken); 
       localStorage.setItem('refreshToken', jwtRefreshToken);
 
       navigate('/'); // Redirect to home page
