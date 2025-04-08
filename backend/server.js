@@ -13,6 +13,8 @@ const app = express();
 const PORT = 3000;
 const SECRET_KEY = 'your_jwt_secret_key'; // Move to .env
 
+const refreshTokens = []; // In-memory storage for refresh tokens (use a database in production)
+
 // Enable middleware to parse JSON bodies
 app.use(express.json());
 
@@ -42,6 +44,11 @@ function isAuthenticated(req, res, next) {
     });
 }
 
+// Generate a refresh token
+function generateRefreshToken(user) {
+    return jwt.sign(user, SECRET_KEY, { expiresIn: '1d' });
+}
+
 // Logon endpoint
 app.post('/api/logon', express.urlencoded({ extended: false }), (req, res) => {
     const { username, password } = req.body;
@@ -54,16 +61,52 @@ app.post('/api/logon', express.urlencoded({ extended: false }), (req, res) => {
         return res.status(401).json({ message: 'Invalid credentials.' });
     }
 
-    // Generate a JWT
-    const token = jwt.sign({ userName: username }, SECRET_KEY, { expiresIn: '1h' });
-    
-    res.status(200).json({ message: 'Logged in successfully.', token });
+    // Generate a JWT and a refresh token
+    const token = jwt.sign({ userName: username }, SECRET_KEY, { expiresIn: 5 }); //'1h'
+    const refreshToken = generateRefreshToken({ userName: username });
+
+    console.log('Generated refreshToken:', refreshToken);
+    refreshTokens.push(refreshToken);
+
+    res.status(200).json({ message: 'Logged in successfully.', token, refreshToken });
+});
+
+// Refresh token endpoint
+app.post('/api/refresh-token', (req, res) => {
+
+    // Extract token from Authorization header    
+    const refreshToken = req.headers.authorization?.split(' ')[1]; 
+
+    console.log('Refresh token:', refreshToken);
+
+    if (!refreshToken || !refreshTokens.includes(refreshToken)) {
+        return res.status(403).json({ message: 'Refresh token is invalid or missing.' });
+    }
+
+    jwt.verify(refreshToken, SECRET_KEY, (err, user) => {
+        if (err) {
+            return res.status(403).json({ message: 'Invalid or expired refresh token.' });
+        }
+
+        // Generate a new access token
+        const newAccessToken = jwt.sign({ userName: user.userName }, SECRET_KEY, { expiresIn: 5 });
+
+        // TODO: Consider also generating a new refresh token and updating the list as per security best practice (token rotation)
+        res.status(200).json({ token: newAccessToken });
+    });
 });
 
 // Logout endpoint
 app.post('/api/logout', isAuthenticated, (req, res) => {
     // Inform the client to discard the token
     res.json({ message: 'Logged out successfully. Please discard your token.' });
+
+    // Remove refresh token
+    const { refreshToken } = req.body;
+    const index = refreshTokens.indexOf(refreshToken);
+    if (index > -1) {
+        refreshTokens.splice(index, 1);
+    }
 });
 
 app.get('/api/check-session', isAuthenticated, (req, res) => {

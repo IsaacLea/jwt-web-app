@@ -1,25 +1,19 @@
 import { useEffect, useState } from "react";
 import { Navigate, Outlet } from "react-router-dom";
-import axiosInstance from "../../Utils/AxiosInstance";
+import axiosInstance from "../../Utils/axiosInstance";
 
 const ProtectedRoute = () => {
 
-  const [currentUser, setCurrentUser] = useState<string | undefined | null>(undefined);
+  const [isAuthenticated, setAuthenticated] = useState<boolean | undefined | null>(undefined);
   
 
   // Call the API to check if the session token is valid
   const isValidSessionToken = async (sessionToken : string | null) => {
 
     try {
-      // const response = await fetch('http://localhost:3000/api/check-session', {
-      //   method: 'GET',
-      //   headers: {
-      //     'Authorization':  sessionToken || ''
-      //   }
-      // });
-
+     
       const response = await axiosInstance.get('http://localhost:3000/api/check-session');
-
+      
       return (response.status == 200);
       
     } catch {
@@ -29,27 +23,27 @@ const ProtectedRoute = () => {
 
   useEffect(() => {
 
-    const sessionToken = localStorage.getItem('sessionToken');
+    const jwtAccessToken = localStorage.getItem('sessionToken');
 
-    if (!sessionToken) {
-      setCurrentUser(null); // No session token, user is not logged in
+    if (!jwtAccessToken) {
+      setAuthenticated(null); // No session token, user is not logged in
       return;
     }
     
-    isValidSessionToken(sessionToken).then((isValid) => {
+    isValidSessionToken(jwtAccessToken).then((isValid) => {
       if (isValid) {
         console.log("Valid session token");       
-        setCurrentUser("Isaac");   
+        setAuthenticated(true);   
 
       } else {
-        setCurrentUser(null);   
+        setAuthenticated(null);   
       }
     });
   }, []);
 
-  if (currentUser === undefined) return null; // Loading state
+  if (isAuthenticated === undefined) return null; // Loading state
 
-  if (!currentUser) {
+  if (!isAuthenticated) {
     return <Navigate to="/logon" replace />;
   }
 

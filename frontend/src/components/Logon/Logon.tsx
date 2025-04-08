@@ -20,9 +20,12 @@ function Logon() {
         throw new Error('Failed to logon');
       }
 
-      const jwt = response.data.token;
+      const jwtAccessToken = response.data.token;
+      const jwtRefreshToken = response.data.refreshToken;
+      
 
-      localStorage.setItem('sessionToken', jwt); // Store JWT in local storage
+      localStorage.setItem('sessionToken', jwtAccessToken); 
+      localStorage.setItem('refreshToken', jwtRefreshToken);
 
       navigate('/'); // Redirect to home page
       
